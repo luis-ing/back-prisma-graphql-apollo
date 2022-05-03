@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model clasificacion {
+  idclasificacion      Int       @id @default(autoincrement())
+  titulo_clasificacion String?   @db.VarChar(45)
+  fecha_creada         DateTime? @db.DateTime(0)
+  estatus              Int?      @default(1)
+  tareas               tareas[]
+}
+
+model prioridad_tareas {
+  id_prioridad_tareas Int      @id @default(autoincrement())
+  titulo_prioridad    String?  @db.VarChar(45)
+  tareas              tareas[]
+}
+
+model tareas {
+  idtareas            Int               @default(autoincrement())
+  titulo              String?           @db.VarChar(45)
+  contenido           String?           @db.Text
+  creado_por          Int
+  asignado            Int
+  fecha_creada        DateTime?         @default(now()) @db.DateTime(0)
+  idclasificacion     Int?
+  id_prioridad_tareas Int?
+  prioridad_tareas    prioridad_tareas? @relation(fields: [id_prioridad_tareas], references: [id_prioridad_tareas], onDelete: NoAction, onUpdate: NoAction, map: "fk_tareas_prioridad_tareas1")
+  clasificacion       clasificacion?    @relation(fields: [idclasificacion], references: [idclasificacion], onDelete: NoAction, onUpdate: NoAction, map: "fk_tareas_clasificacion")
+
+  @@id([idtareas, creado_por, asignado])
+  @@index([idclasificacion], map: "fk_tareas_clasificacion_idx")
+  @@index([id_prioridad_tareas], map: "fk_tareas_prioridad_tareas1_idx")
+}
+
+model usuario {
+  idusuario      Int     @id @default(autoincrement())
+  nombre         String? @db.VarChar(45)
+  apellidos      String? @db.VarChar(45)
+  alias          String? @db.VarChar(45)
+  contrasena     String? @db.VarChar(45)
+  estatus_activo Int?
+}
