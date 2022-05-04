@@ -11,7 +11,6 @@ const typeDefs = gql`
         titulo_clasificacion: String
         fecha_creada: String
         estatus: Int
-        tareas: [Tareas]
     }
 
     type Prioridad_tareas {
@@ -26,8 +25,8 @@ const typeDefs = gql`
         creado_por: Int
         asignado: Int
         fecha_creada: String
-        idclasificacion: [Clasificacion]
-        id_prioridad_tareas: [Prioridad_tareas]
+        clasificacion: Clasificacion
+        prioridad_tareas: Prioridad_tareas
     }
 
     type Usuario {
@@ -49,10 +48,10 @@ const typeDefs = gql`
 
     type Query {
         hello: String
-        allClasification: [Clasificacion]!
+        allClasification: [Clasificacion]
         allUsuario: [Usuario]!
         allPrioridad: [Prioridad_tareas]!
-        allTareas: [Tareas]!
+        allTareas: [Tareas]
     }
 
     type Mutation {
@@ -74,11 +73,7 @@ const resolvers = {
     Query: {
         hello: () => 'Hello world',
         allClasification: () => {
-            return prisma.clasificacion.findMany({
-                include: {
-                    tareas: true,
-                }
-            });
+            return prisma.clasificacion.findMany();
         },
         allUsuario: () => {
             return prisma.usuario.findMany();
@@ -87,7 +82,12 @@ const resolvers = {
             return prisma.prioridad_tareas.findMany()
         },
         allTareas: () => {
-            return prisma.tareas.findMany()
+            return prisma.tareas.findMany({
+                include: {
+                    clasificacion: true,
+                    prioridad_tareas: true,
+                }
+            })
         }
     },
 
