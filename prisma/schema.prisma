@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model proyecto {
+  idproyecto  Int      @id @default(autoincrement())
+  nombre      String?  @db.VarChar(45)
+  completado  Boolean? @default(false)
+  activo      Boolean? @default(true)
+  usuarios_id Int
+  usuario     usuario  @relation(fields: [usuarios_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proyecto_usuarios1")
+  tarea       tarea[]
+
+  @@index([usuarios_id], map: "fk_proyecto_usuarios1_idx")
+}
+
+model tarea {
+  id                                    Int       @id @default(autoincrement())
+  titulo                                String    @db.VarChar(50)
+  contenido                             String?   @db.Text
+  fecha_creacion                        DateTime  @default(now()) @db.DateTime(0)
+  fecha_modificacion                    DateTime? @default(now()) @db.DateTime(0)
+  activo                                Boolean   @default(true)
+  id_creador                            Int
+  id_responsable                        Int?
+  idproyecto                            Int
+  proyecto                              proyecto  @relation(fields: [idproyecto], references: [idproyecto], onDelete: NoAction, onUpdate: NoAction, map: "fk_tareas_proyecto1")
+  usuario_tarea_id_creadorTousuario     usuario   @relation("tarea_id_creadorTousuario", fields: [id_creador], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tareas_usuarios")
+  usuario_tarea_id_responsableTousuario usuario?  @relation("tarea_id_responsableTousuario", fields: [id_responsable], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tareas_usuarios1")
+
+  @@index([idproyecto], map: "fk_tareas_proyecto1_idx")
+  @@index([id_responsable], map: "fk_tareas_usuarios1_idx")
+  @@index([id_creador], map: "fk_tareas_usuarios_idx")
+}
+
+model usuario {
+  id                                  Int        @id @default(autoincrement())
+  nombre                              String     @db.VarChar(45)
+  apellidos                           String?    @db.VarChar(45)
+  username                            String     @db.VarChar(45)
+  password                            String     @db.Text
+  fecha_registro                      DateTime   @default(now()) @db.DateTime(0)
+  activo                              Boolean    @default(true)
+  proyecto                            proyecto[]
+  tarea_tarea_id_creadorTousuario     tarea[]    @relation("tarea_id_creadorTousuario")
+  tarea_tarea_id_responsableTousuario tarea[]    @relation("tarea_id_responsableTousuario")
+}

@@ -1,0 +1,33 @@
+{
+  "name": "back-prisma-graphql-apollo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luis-ing/back-prisma-graphql-apollo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luis-ing/back-prisma-graphql-apollo/issues"
+  },
+  "homepage": "https://github.com/luis-ing/back-prisma-graphql-apollo#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.20",
+    "prisma": "^4.7.1"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.3.0",
+    "@prisma/client": "^4.7.1",
+    "apollo-server": "^3.11.1",
+    "bcryptjs": "^2.4.3",
+    "graphql": "^16.6.0"
+  }
+}
