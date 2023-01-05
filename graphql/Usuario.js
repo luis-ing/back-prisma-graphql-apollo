@@ -1,6 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import { gql } from "apollo-server";
+import { gql } from 'apollo-server';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import env from 'dotenv';
+env.config();
 
 const prisma = new PrismaClient();
 
@@ -9,7 +12,7 @@ export const typeDefs = gql`
     type Query {
         getUsuarios: [usuario]
         getUsuario(id: Int!): usuario
-        loginUsuario(username: String, password: String): respondMsg
+        LoginUsuario(username: String, password: String): respondMsg
     }
 
     type Mutation {
@@ -31,6 +34,7 @@ export const typeDefs = gql`
     type respondMsg {
         code: Int
         mng: String
+        data: String
     }
 `;
 
@@ -56,7 +60,7 @@ export const resolver = {
                 return error;
             }
         },
-        loginUsuario: async (_, { username, password }) => {
+        LoginUsuario: async (_, { username, password }) => {
             try {
                 const usuario = await prisma.usuario.findFirst({
                     where: {
@@ -66,7 +70,8 @@ export const resolver = {
                 if(usuario){
                     const checkPassword = await bcrypt.compare(password, usuario.password);
                     if(checkPassword){
-                        const respuesta = {code: 1, mng: `Usuario ${username}, sesion iniciada`};
+                        const token = jwt.sign({ user: username }, process.env.SECURITY_KEY, { expiresIn: '1h' });
+                        const respuesta = {code: 1, mng: `Usuario ${username}, sesion iniciada`, data: token};
                         return respuesta;
                     } else {
                         const respuesta = {code: 2, mng: "Usuario existente, contraseña incorrecta"};
