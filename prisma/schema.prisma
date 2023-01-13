@@ -7,14 +7,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model usuario {
+  id                                  Int                  @id @default(autoincrement())
+  nombre                              String               @db.VarChar(45)
+  apellidos                           String?              @db.VarChar(45)
+  username                            String               @db.VarChar(45)
+  password                            String               @db.Text
+  fecha_registro                      DateTime             @default(now()) @db.DateTime(0)
+  activo                              Boolean              @default(true)
+  proyecto                            proyecto[]
+  t_proyecto_usuario                  t_proyecto_usuario[]
+  tarea_tarea_id_creadorTousuario     tarea[]              @relation("tarea_id_creadorTousuario")
+  tarea_tarea_id_responsableTousuario tarea[]              @relation("tarea_id_responsableTousuario")
+}
+
+model t_proyecto_usuario {
+  proyecto_idproyecto   Int
+  usuario_id            Int
+  fecha_creacion        DateTime?            @default(now()) @db.DateTime(0)
+  activo                Boolean              @default(true)
+  id_estatus_invitacion Int
+  proyecto              proyecto             @relation(fields: [proyecto_idproyecto], references: [idproyecto], onDelete: NoAction, onUpdate: NoAction, map: "fk_proyecto_has_usuario_proyecto1")
+  usuario               usuario              @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proyecto_has_usuario_usuario1")
+  c_estatus_invitacion  c_estatus_invitacion @relation(fields: [id_estatus_invitacion], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_t_proyecto_usuario_c_estatus_invitacion1")
+
+  @@id([proyecto_idproyecto, usuario_id])
+  @@index([proyecto_idproyecto], map: "fk_proyecto_has_usuario_proyecto1_idx")
+  @@index([usuario_id], map: "fk_proyecto_has_usuario_usuario1_idx")
+  @@index([id_estatus_invitacion], map: "fk_t_proyecto_usuario_c_estatus_invitacion1_idx")
+}
+
+model c_estatus_invitacion {
+  id                 Int                  @id @default(autoincrement())
+  titulo             String?              @db.VarChar(65)
+  activo             Boolean              @default(true)
+  t_proyecto_usuario t_proyecto_usuario[]
+}
+
 model proyecto {
-  idproyecto  Int      @id @default(autoincrement())
-  nombre      String?  @db.VarChar(45)
-  completado  Boolean? @default(false)
-  activo      Boolean? @default(true)
-  usuarios_id Int
-  usuario     usuario  @relation(fields: [usuarios_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proyecto_usuarios1")
-  tarea       tarea[]
+  idproyecto         Int                  @id @default(autoincrement())
+  nombre             String?              @db.VarChar(45)
+  completado         Boolean?             @default(false)
+  activo             Boolean?             @default(true)
+  usuarios_id        Int
+  usuario            usuario              @relation(fields: [usuarios_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proyecto_usuarios1")
+  t_proyecto_usuario t_proyecto_usuario[]
+  tarea              tarea[]
 
   @@index([usuarios_id], map: "fk_proyecto_usuarios1_idx")
 }
@@ -36,17 +74,4 @@ model tarea {
   @@index([idproyecto], map: "fk_tareas_proyecto1_idx")
   @@index([id_responsable], map: "fk_tareas_usuarios1_idx")
   @@index([id_creador], map: "fk_tareas_usuarios_idx")
-}
-
-model usuario {
-  id                                  Int        @id @default(autoincrement())
-  nombre                              String     @db.VarChar(45)
-  apellidos                           String?    @db.VarChar(45)
-  username                            String     @db.VarChar(45)
-  password                            String     @db.Text
-  fecha_registro                      DateTime   @default(now()) @db.DateTime(0)
-  activo                              Boolean    @default(true)
-  proyecto                            proyecto[]
-  tarea_tarea_id_creadorTousuario     tarea[]    @relation("tarea_id_creadorTousuario")
-  tarea_tarea_id_responsableTousuario tarea[]    @relation("tarea_id_responsableTousuario")
 }

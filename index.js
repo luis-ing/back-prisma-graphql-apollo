@@ -4,6 +4,7 @@ import env from 'dotenv';
 env.config();
 
 import { typeDefs as UsuarioTypeDefs, resolver as UsuarioResolvers } from './graphql/Usuario.js';
+import { typeDefs as ProyectoTypeDefs, resolver as ProyectoResolvers } from './graphql/Proyecto.js';
 
 const Query = `
     scalar DateTime
@@ -12,9 +13,11 @@ const Query = `
 const typeDefs = [
     Query,
     UsuarioTypeDefs,
+    ProyectoTypeDefs,
 ];
 const resolvers = [
     UsuarioResolvers,
+    ProyectoResolvers,
 ];
 
 async function startApolloServer() {
@@ -25,7 +28,7 @@ async function startApolloServer() {
             const token = req.headers.authorization ? req.headers.authorization : null;
             if(!req.body.operationName.startsWith('IntrospectionQuery')) {
                 // console.log(req.body.operationName);
-                const querysIncluidas = !['LoginUsuario'].includes(req.body.operationName);
+                const querysIncluidas = !['LoginUsuario', 'NewUsuario'].includes(req.body.operationName);
                 // console.log(querysIncluidas);
                 if(querysIncluidas){
                     try {                        

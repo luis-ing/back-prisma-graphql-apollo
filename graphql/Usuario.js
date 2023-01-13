@@ -10,13 +10,13 @@ const prisma = new PrismaClient();
 export const typeDefs = gql`
 
     type Query {
+        newUsuario(nombre: String, apellidos: String, username: String, password: String): respondMsg
         getUsuarios: [usuario]
         getUsuario(id: Int!): usuario
         LoginUsuario(username: String, password: String): respondMsg
     }
 
     type Mutation {
-        newUsuario(nombre: String, apellidos: String, username: String, password: String): usuario
         updateUsuario(id: Int,nombre: String, apellidos: String, username: String, password: String): usuario
         deleteUsuario(id: Int): usuario
     }
@@ -85,23 +85,25 @@ export const resolver = {
                 console.log(error)
                 return error;
             }
-        }
-    },
-    Mutation: {
+        },
         newUsuario: async (_, {nombre, apellidos, username, password}) => {
             try {
                 const passHash = await bcrypt.hash(password, 10);
-                const n_Usuario = await prisma.usuario.create({
+                const usuario = await prisma.usuario.create({
                     data: {
                         nombre: nombre, apellidos: apellidos, username: username, password: passHash
                     },
                 })
-                return n_Usuario;
+                const token = jwt.sign({ idUser: usuario.id, username: usuario.username }, process.env.SECURITY_KEY, { expiresIn: '1h' });
+                const respuesta = {code: 1, mng: `Usuario ${username}, sesion iniciada`, data: token};
+                return respuesta;
             } catch (error) {
                 console.log(error);
                 return error;
             }
         },
+    },
+    Mutation: {
         updateUsuario: async (_, {id, nombre, apellidos, username, password}) => {
             try {
                 const passHash = await bcrypt.hash(password, 10);
