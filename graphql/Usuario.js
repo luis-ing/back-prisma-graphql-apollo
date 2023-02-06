@@ -70,8 +70,10 @@ export const resolver = {
                 if(usuario){
                     const checkPassword = await bcrypt.compare(password, usuario.password);
                     if(checkPassword){
-                        const token = jwt.sign({ user: username }, process.env.SECURITY_KEY, { expiresIn: '1h' });
-                        const respuesta = {code: 1, mng: `Usuario ${username}, sesion iniciada`, data: token};
+                        const token = jwt.sign({ user: username }, process.env.SECURITY_KEY, { expiresIn: '24h' });
+                        const dataUser = { id: usuario.id, username: username, name: `${usuario.nombre} ${usuario.apellidos}` };
+                        console.log(dataUser);
+                        const respuesta = {code: 1, mng: JSON.stringify(dataUser), data: token};
                         return respuesta;
                     } else {
                         const respuesta = {code: 2, mng: "Usuario existente, contraseña incorrecta"};

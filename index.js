@@ -5,6 +5,7 @@ env.config();
 
 import { typeDefs as UsuarioTypeDefs, resolver as UsuarioResolvers } from './graphql/Usuario.js';
 import { typeDefs as ProyectoTypeDefs, resolver as ProyectoResolvers } from './graphql/Proyecto.js';
+import { typeDefs as MenuTypeDefs, resolver as MenuResolvers } from './graphql/Menu.js';
 
 const Query = `
     scalar DateTime
@@ -14,10 +15,12 @@ const typeDefs = [
     Query,
     UsuarioTypeDefs,
     ProyectoTypeDefs,
+    MenuTypeDefs
 ];
 const resolvers = [
     UsuarioResolvers,
     ProyectoResolvers,
+    MenuResolvers
 ];
 
 async function startApolloServer() {
