@@ -23,18 +23,18 @@ model usuario {
 }
 
 model t_proyecto_usuario {
-  idproyecto            Int
-  usuario_id            Int
+  id_proyecto           Int
+  id_usuario            Int
   fecha_creacion        DateTime?            @default(now()) @db.DateTime(0)
   activo                Boolean              @default(true)
   id_estatus_invitacion Int
-  proyecto              proyecto             @relation(fields: [idproyecto], references: [idproyecto], onDelete: NoAction, onUpdate: NoAction, map: "fk_proyecto_has_usuario_proyecto1")
-  usuario               usuario              @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proyecto_has_usuario_usuario1")
+  proyecto              proyecto             @relation(fields: [id_proyecto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proyecto_has_usuario_proyecto1")
+  usuario               usuario              @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proyecto_has_usuario_usuario1")
   c_estatus_invitacion  c_estatus_invitacion @relation(fields: [id_estatus_invitacion], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_t_proyecto_usuario_c_estatus_invitacion1")
 
-  @@id([idproyecto, usuario_id])
-  @@index([idproyecto], map: "fk_proyecto_has_usuario_proyecto1_idx")
-  @@index([usuario_id], map: "fk_proyecto_has_usuario_usuario1_idx")
+  @@id([id_proyecto, id_usuario])
+  @@index([id_proyecto], map: "fk_proyecto_has_usuario_proyecto1_idx")
+  @@index([id_usuario], map: "fk_proyecto_has_usuario_usuario1_idx")
   @@index([id_estatus_invitacion], map: "fk_t_proyecto_usuario_c_estatus_invitacion1_idx")
 }
 
@@ -46,11 +46,13 @@ model c_estatus_invitacion {
 }
 
 model proyecto {
-  idproyecto         Int                  @id @default(autoincrement())
-  nombre             String?              @db.VarChar(45)
+  id                 Int                  @id @default(autoincrement())
+  nombre             String               @db.VarChar(65)
+  clave              String               @db.VarChar(45)
   completado         Boolean?             @default(false)
-  activo             Boolean?             @default(true)
+  activo             Boolean              @default(true)
   usuarios_id        Int
+  c_columna_tablero  c_columna_tablero[]
   usuario            usuario              @relation(fields: [usuarios_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proyecto_usuarios1")
   sprint             sprint[]
   t_proyecto_usuario t_proyecto_usuario[]
@@ -59,20 +61,29 @@ model proyecto {
 }
 
 model tarea {
-  id                                    Int                @id @default(autoincrement())
-  titulo                                String             @db.VarChar(50)
-  contenido                             String?            @db.Text
-  fecha_creacion                        DateTime           @default(now()) @db.DateTime(0)
-  fecha_modificacion                    DateTime?          @default(now()) @db.DateTime(0)
-  activo                                Boolean            @default(true)
+  id                                    Int               @id @default(autoincrement())
+  titulo                                String            @db.VarChar(50)
+  contenido                             String?           @db.Text
+  fecha_creacion                        DateTime          @default(now()) @db.DateTime(0)
+  fecha_modificacion                    DateTime          @default(now()) @db.DateTime(0)
+  orden                                 Int               @default(0)
+  activo                                Boolean           @default(true)
   id_creador                            Int
   id_responsable                        Int?
-  t_sprint_tickets                      t_sprint_tickets[]
-  usuario_tarea_id_creadorTousuario     usuario            @relation("tarea_id_creadorTousuario", fields: [id_creador], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tareas_usuarios")
-  usuario_tarea_id_responsableTousuario usuario?           @relation("tarea_id_responsableTousuario", fields: [id_responsable], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tareas_usuarios1")
+  id_urgencia                           Int               @default(1)
+  id_columna_tablero                    Int
+  id_sprint                             Int?
+  c_columna_tablero                     c_columna_tablero @relation(fields: [id_columna_tablero], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tarea_c_columna_tablero1")
+  c_estado_urgencia                     c_estado_urgencia @relation(fields: [id_urgencia], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tarea_c_estado_urgencia1")
+  sprint                                sprint?           @relation(fields: [id_sprint], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tarea_sprint1")
+  usuario_tarea_id_creadorTousuario     usuario           @relation("tarea_id_creadorTousuario", fields: [id_creador], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tareas_usuarios")
+  usuario_tarea_id_responsableTousuario usuario?          @relation("tarea_id_responsableTousuario", fields: [id_responsable], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tareas_usuarios1")
 
   @@index([id_responsable], map: "fk_tareas_usuarios1_idx")
   @@index([id_creador], map: "fk_tareas_usuarios_idx")
+  @@index([id_columna_tablero], map: "fk_tarea_c_columna_tablero1_idx")
+  @@index([id_urgencia], map: "fk_tarea_c_estado_urgencia1_idx")
+  @@index([id_sprint], map: "fk_tarea_sprint1_idx")
 }
 
 model c_herramientas {
@@ -97,24 +108,36 @@ model permisos {
 }
 
 model sprint {
-  id               Int                @id @default(autoincrement())
-  idproyecto       Int
-  numer_sprint     Int?
-  fecha_inicio     DateTime?          @db.Date
-  fecha_fin        DateTime?          @db.Date
-  proyecto         proyecto           @relation(fields: [idproyecto], references: [idproyecto], onDelete: NoAction, onUpdate: NoAction, map: "fk_sprint_proyecto1")
-  t_sprint_tickets t_sprint_tickets[]
+  id               Int       @id @default(autoincrement())
+  id_proyecto      Int
+  numer_sprint     Int
+  fecha_inicio     DateTime? @db.Date
+  fecha_fin        DateTime? @db.Date
+  fecha_completado DateTime? @db.Date
+  es_backlog       Boolean   @default(false)
+  iniciado         Boolean?  @default(false)
+  completado       Boolean   @default(false)
+  activo           Boolean   @default(true)
+  proyecto         proyecto  @relation(fields: [id_proyecto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sprint_proyecto1")
+  tarea            tarea[]
 
-  @@index([idproyecto], map: "fk_sprint_proyecto1_idx")
+  @@index([id_proyecto], map: "fk_sprint_proyecto1_idx")
 }
 
-model t_sprint_tickets {
-  sprint_id Int
-  tarea_id  Int
-  sprint    sprint @relation(fields: [sprint_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sprint_has_tarea_sprint1")
-  tarea     tarea  @relation(fields: [tarea_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sprint_has_tarea_tarea1")
+model c_columna_tablero {
+  id          Int      @id @default(autoincrement())
+  descripcion String?  @db.VarChar(65)
+  activo      Boolean  @default(true)
+  id_proyecto Int
+  proyecto    proyecto @relation(fields: [id_proyecto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_c_columna_tablero_proyecto1")
+  tarea       tarea[]
 
-  @@id([sprint_id, tarea_id])
-  @@index([sprint_id], map: "fk_sprint_has_tarea_sprint1_idx")
-  @@index([tarea_id], map: "fk_sprint_has_tarea_tarea1_idx")
+  @@index([id_proyecto], map: "fk_c_columna_tablero_proyecto1_idx")
+}
+
+model c_estado_urgencia {
+  id     Int     @id @default(autoincrement())
+  nombre String? @db.VarChar(65)
+  activo Boolean @default(true)
+  tarea  tarea[]
 }
