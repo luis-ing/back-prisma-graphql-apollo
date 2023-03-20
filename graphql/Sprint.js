@@ -6,27 +6,54 @@ const prisma = new PrismaClient();
 export const typeDefs = gql`
 
     type Query {
-        GetSprint(id_proyecto: Int!): [proyecto]
+        getSprint(id_proyecto: Int!): [Sprint]
     }
 
     type Sprint {
         id: Int
-        nombre: String
-        path: String
-        orden: Int
+        id_proyecto: Int
+        numer_sprint: Int
+        fecha_inicio: DateTime
+        fecha_fin: DateTime
+        fecha_completado: DateTime
+        es_backlog: Int
+        iniciado: Int
+        completado: Int
         activo: Int
+        tickets: [Tarea]
     }
 `;
 
 export const resolver = {
     Query: {
-        GetSprint: async (_, { id_proyecto }) => {
+        getSprint: async (_, { id_proyecto }) => {
             try {
                 const proyecto = await prisma.sprint.findMany({
                     where: {
                         activo: true,
                         id_proyecto
-                    }
+                    },
+                    include: {
+                        tarea: {
+                            select: {
+                                id: true,
+                                titulo: true,
+                                contenido: true,
+                                fecha_creacion: true,
+                                fecha_modificacion: true,
+                                orden: true,
+                                activo: true,
+                                id_creador: true,
+                                id_responsable: true,
+                                id_urgencia: true,
+                                id_columna_tablero: true,
+                                id_sprint: true,
+                            },
+                            orderBy: {
+                                orden: 'asc',
+                            }
+                        }
+                    },
                 });
                 return proyecto;
             } catch (error) {
@@ -35,9 +62,7 @@ export const resolver = {
             }
         },
     },
-    Permisos: {
-        herramienta: async (root) => {
-            return root.c_herramientas;
-        }
+    Sprint: {
+        tickets: async root => root.tarea
     }
 };

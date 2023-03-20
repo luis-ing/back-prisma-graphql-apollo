@@ -9,6 +9,7 @@ export const typeDefs = gql`
         GetProyectos: [proyecto]
         GetProyecto(idproyecto: Int!): proyecto
         GetTProyecto: [proyecto_usuario]
+        getProyectinfo(id: Int!): proyecto
     }
 
     type Mutation {
@@ -18,8 +19,9 @@ export const typeDefs = gql`
     }
 
     type proyecto {
-        idproyecto: Int!
+        id: Int!
         nombre: String
+        clave: String
         completado: Int
         activo: Int
         usuarios_id: Int
@@ -50,7 +52,7 @@ export const resolver = {
                 return error;
             }
         },
-        GetProyecto: async (_, {idproyecto}) => {
+        GetProyecto: async (_, { idproyecto }) => {
             try {
                 return await prisma.proyecto.findUnique({
                     where: {
@@ -69,10 +71,22 @@ export const resolver = {
                 console.log(error);
                 return error;
             }
+        },
+        getProyectinfo: async (_, { id }) => {
+            try {
+                return await prisma.proyecto.findUnique({
+                    where: {
+                        id
+                    }
+                });
+            } catch (error) {
+                console.log(error);
+                return error;
+            }
         }
     },
     Mutation: {
-        newProyecto: async (_, {nombre, usuarios_id}) => {
+        newProyecto: async (_, { nombre, usuarios_id }) => {
             try {
                 console.log(nombre, usuarios_id);
                 // const Proyecto = await prisma.proyecto.create({
@@ -86,18 +100,18 @@ export const resolver = {
                     },
                 });
                 // console.log(Proyecto);
-                const respuesta = {code: 1, mng: `Proyecto ${nombre}, creado correctamente`, data: null};
+                const respuesta = { code: 1, mng: `Proyecto ${nombre}, creado correctamente`, data: null };
                 return respuesta;
             } catch (error) {
                 console.log(error);
                 return error;
             }
         },
-        UpdateProyecto: async (_, {id, nombre}) => {
+        UpdateProyecto: async (_, { id, nombre }) => {
             try {
                 const updateProyecto = await prisma.proyecto.update({
                     where: {
-                      id: id,
+                        id: id,
                     },
                     data: {
                         nombre: nombre,
