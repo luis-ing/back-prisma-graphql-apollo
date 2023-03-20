@@ -50,6 +50,7 @@ export const resolver = {
                                 id_sprint: true,
                             },
                             orderBy: {
+                                // id_columna_tablero: 'asc',
                                 orden: 'asc',
                             }
                         }
