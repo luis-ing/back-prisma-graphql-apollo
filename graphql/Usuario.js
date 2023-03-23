@@ -48,7 +48,7 @@ export const resolver = {
                 return error;
             }
         },
-        getUsuario: async (_, {id}) => {
+        getUsuario: async (_, { id }) => {
             try {
                 return await prisma.usuario.findUnique({
                     where: {
@@ -67,20 +67,20 @@ export const resolver = {
                         username: username
                     },
                 });
-                if(usuario){
+                if (usuario) {
                     const checkPassword = await bcrypt.compare(password, usuario.password);
-                    if(checkPassword){
-                        const token = jwt.sign({ user: username }, process.env.SECURITY_KEY, { expiresIn: '24h' });
+                    if (checkPassword) {
+                        const token = jwt.sign({ id: usuario.id, user: username }, process.env.SECURITY_KEY, { expiresIn: '24h' });
                         const dataUser = { id: usuario.id, username: username, name: `${usuario.nombre} ${usuario.apellidos}` };
                         console.log(dataUser);
-                        const respuesta = {code: 1, mng: JSON.stringify(dataUser), data: token};
+                        const respuesta = { code: 1, mng: JSON.stringify(dataUser), data: token };
                         return respuesta;
                     } else {
-                        const respuesta = {code: 2, mng: "Usuario existente, contraseña incorrecta"};
+                        const respuesta = { code: 2, mng: "Usuario existente, contraseña incorrecta" };
                         return respuesta;
                     }
                 } else {
-                    const respuesta = {code: 0, mng: "Usuario no existentes"};
+                    const respuesta = { code: 0, mng: "Usuario no existentes" };
                     return respuesta;
                 }
             } catch (error) {
@@ -88,7 +88,7 @@ export const resolver = {
                 return error;
             }
         },
-        newUsuario: async (_, {nombre, apellidos, username, password}) => {
+        newUsuario: async (_, { nombre, apellidos, username, password }) => {
             try {
                 const passHash = await bcrypt.hash(password, 10);
                 const usuario = await prisma.usuario.create({
@@ -97,7 +97,7 @@ export const resolver = {
                     },
                 })
                 const token = jwt.sign({ idUser: usuario.id, username: usuario.username }, process.env.SECURITY_KEY, { expiresIn: '1h' });
-                const respuesta = {code: 1, mng: `Usuario ${username}, sesion iniciada`, data: token};
+                const respuesta = { code: 1, mng: `Usuario ${username}, sesion iniciada`, data: token };
                 return respuesta;
             } catch (error) {
                 console.log(error);
@@ -106,12 +106,12 @@ export const resolver = {
         },
     },
     Mutation: {
-        updateUsuario: async (_, {id, nombre, apellidos, username, password}) => {
+        updateUsuario: async (_, { id, nombre, apellidos, username, password }) => {
             try {
                 const passHash = await bcrypt.hash(password, 10);
                 const updateUser = await prisma.usuario.update({
                     where: {
-                      id: id,
+                        id: id,
                     },
                     data: {
                         nombre: nombre,
@@ -130,7 +130,7 @@ export const resolver = {
             try {
                 const deleteUser = await prisma.usuario.update({
                     where: {
-                      id: id,
+                        id: id,
                     },
                     data: {
                         activo: false,

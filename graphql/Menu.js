@@ -44,12 +44,12 @@ export const resolver = {
                 return error;
             }
         },
-        getPermissionUser: async (_, { idUser }) => {
+        getPermissionUser: async (_, arg, ctx) => {
             try {
                 const permisos = await prisma.permisos.findMany({
                     where: {
                         activo: true,
-                        usuario_id: idUser
+                        usuario_id: ctx.id
                     },
                     include: {
                         c_herramientas: true
@@ -64,7 +64,7 @@ export const resolver = {
         }
     },
     Mutation: {
-        newProyecto: async (_, {nombre, usuarios_id}) => {
+        newProyecto: async (_, { nombre, usuarios_id }) => {
             try {
                 console.log(nombre, usuarios_id);
                 // const Proyecto = await prisma.proyecto.create({
@@ -78,7 +78,7 @@ export const resolver = {
                     },
                 });
                 // console.log(Proyecto);
-                const respuesta = {code: 1, mng: `Proyecto ${nombre}, creado correctamente`, data: null};
+                const respuesta = { code: 1, mng: `Proyecto ${nombre}, creado correctamente`, data: null };
                 return respuesta;
             } catch (error) {
                 console.log(error);

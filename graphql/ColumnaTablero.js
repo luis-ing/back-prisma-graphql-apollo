@@ -35,7 +35,7 @@ export const resolver = {
                         tarea: {
                             orderBy: {
                                 orden: 'asc'
-                            }
+                            },
                         },
                     },
                 });
@@ -49,11 +49,8 @@ export const resolver = {
     Mutation: {
         updateColumnTicket: async (_, { data }) => {
             try {
-                console.log('data => ');
                 JSON.parse(data).map((row) => {
-                    // console.log(row.idColumnOrigin, row.task);
                     row.task && row.task.map(async (item) => {
-                        console.log('item ', item.idTarea, item.orden, row.idColumnOrigin);
                         return await prisma.tarea.update({
                             where: {
                                 id: item.idTarea,
@@ -75,5 +72,15 @@ export const resolver = {
     },
     ColumnaTablero: {
         tickets: async root => root.tarea
+        // tickets: async root => {
+        //     return await prisma.sprint.findMany({
+        //         where: {
+        //             id_proyecto: root.id_proyecto
+        //         },
+        //         // include: {
+        //         //     spr
+        //         // }
+        //     });
+        // }
     }
 };
