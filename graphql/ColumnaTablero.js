@@ -31,13 +31,6 @@ export const resolver = {
                         activo: true,
                         id_proyecto
                     },
-                    include: {
-                        tarea: {
-                            orderBy: {
-                                orden: 'asc'
-                            },
-                        },
-                    },
                 });
                 return ColumnaTablero;
             } catch (error) {
@@ -71,7 +64,27 @@ export const resolver = {
         },
     },
     ColumnaTablero: {
-        tickets: async root => root.tarea
+        tickets: async (root) => {
+            const sprint = await prisma.sprint.findMany({
+                where: {
+                    id_proyecto: root.id_proyecto,
+                    iniciado: true,
+                }
+            });
+            const tarea = await prisma.tarea.findMany({
+                where: {
+                    activo: true,
+                    id_columna_tablero: root.id,
+                    id_sprint: {
+                        in: sprint.map((row) => row.id)
+                    },
+                },
+                orderBy: {
+                    orden: 'asc'
+                },
+            });
+            return tarea;
+        }
         // tickets: async root => {
         //     return await prisma.sprint.findMany({
         //         where: {
